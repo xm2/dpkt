@@ -6,6 +6,7 @@ from __future__ import absolute_import
 
 from . import dpkt
 from . import crc32c
+from math import ceil
 
 # Stream Control Transmission Protocol
 # http://tools.ietf.org/html/rfc2960
@@ -76,7 +77,10 @@ class Chunk(dpkt.Packet):
 
     def unpack(self, buf):
         dpkt.Packet.unpack(self, buf)
-        self.data = self.data[:self.len - self.__hdr_len__]
+        if self.type == DATA and self.len % 4 != 0:
+            self.data = self.data[:int(ceil(self.len/4.0))*4 - self.__hdr_len__]
+        else:
+            self.data = self.data[:self.len - self.__hdr_len__]
 
 
 __s = b'\x80\x44\x00\x50\x00\x00\x00\x00\x30\xba\xef\x54\x01\x00\x00\x3c\x3b\xb9\x9c\x46\x00\x01\xa0\x00\x00\x0a\xff\xff\x2b\x2d\x7e\xb2\x00\x05\x00\x08\x9b\xe6\x18\x9b\x00\x05\x00\x08\x9b\xe6\x18\x9c\x00\x0c\x00\x06\x00\x05\x00\x00\x80\x00\x00\x04\xc0\x00\x00\x04\xc0\x06\x00\x08\x00\x00\x00\x00'
